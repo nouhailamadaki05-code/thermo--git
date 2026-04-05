@@ -1,4 +1,4 @@
-import os
+import oS
 import sqlite3
 
 from flask import Flask, render_template, request
@@ -49,4 +49,4 @@ def index():
     return render_template("index.html", resultats=resultats)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
