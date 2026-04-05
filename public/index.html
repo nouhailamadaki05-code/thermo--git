@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thermo App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            background: #fff;
+        }
+        h3, h4 { font-weight: 700; }
+        .btn-custom {
+            background: linear-gradient(to right, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-custom:hover {
+            background: linear-gradient(to right, #5a67d8, #6b4ca2);
+            color: white;
+        }
+        .result-card { border-left: 5px solid #667eea; }
+        label { font-weight: 500; }
+        input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card p-5 mb-4">
+                    <h3 class="text-center mb-4">💧 Calcul Thermodynamique</h3>
+                    <form id="form-thermo">
+                        <div class="mb-3">
+                            <label for="x1">x1 (benzène)</label>
+                            <input type="number" step="0.01" name="x1" id="x1" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="x2">x2 (toluène)</label>
+                            <input type="number" step="0.01" name="x2" id="x2" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-custom w-100">Calculer</button>
+                    </form>
+                </div>
+                <div id="resultats-wrap" class="card p-4 result-card d-none">
+                    <h4 class="text-center mb-3">📊 Résultats</h4>
+                    <div class="mb-2">
+                        <p><strong>🌡 Température :</strong> <span id="out-T"></span> °C</p>
+                        <p><strong>⚗️ Psat benzène :</strong> <span id="out-P1"></span></p>
+                        <p><strong>⚗️ Psat toluène :</strong> <span id="out-P2"></span></p>
+                    </div>
+                    <hr>
+                    <div class="mb-2">
+                        <p><strong>💨 Pression de bulle :</strong> <span id="out-Pbulle"></span></p>
+                        <p><strong>y1 :</strong> <span id="out-y1"></span></p>
+                        <p><strong>y2 :</strong> <span id="out-y2"></span></p>
+                        <p><strong>✔ Somme :</strong> <span id="out-somme"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Mêmes constantes que init_db.py / database.db
+        const P1_SAT = 101.3;
+        const P2_SAT = 40.0;
+        const T = 80;
+
+        function calculer(x1, x2, P1_sat, P2_sat) {
+            const P_bulle = x1 * P1_sat + x2 * P2_sat;
+            const y1 = (x1 * P1_sat) / P_bulle;
+            const y2 = (x2 * P2_sat) / P_bulle;
+            return { P_bulle, y1, y2 };
+        }
+
+        document.getElementById("form-thermo").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const x1 = parseFloat(document.getElementById("x1").value);
+            const x2 = parseFloat(document.getElementById("x2").value);
+            const { P_bulle, y1, y2 } = calculer(x1, x2, P1_SAT, P2_SAT);
+            document.getElementById("out-T").textContent = T;
+            document.getElementById("out-P1").textContent = P1_SAT;
+            document.getElementById("out-P2").textContent = P2_SAT;
+            document.getElementById("out-Pbulle").textContent = P_bulle.toFixed(2);
+            document.getElementById("out-y1").textContent = y1.toFixed(4);
+            document.getElementById("out-y2").textContent = y2.toFixed(4);
+            document.getElementById("out-somme").textContent = (y1 + y2).toFixed(4);
+            document.getElementById("resultats-wrap").classList.remove("d-none");
+        });
+    </script>
+</body>
+
+</html>

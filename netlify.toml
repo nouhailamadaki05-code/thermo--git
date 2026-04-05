@@ -1,0 +1,9 @@
+# Site statique (calculateur thermo) — pas de serveur Flask sur Netlify.
+[build]
+  publish = "public"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
