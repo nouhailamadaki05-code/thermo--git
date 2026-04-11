@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ThermoApp V2 — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#0a0a0f;--surface:#13131a;--card:#1a1a26;--border:#2a2a40;
+      --accent:#6c63ff;--accent2:#00d4ff;--gold:#ffd700;
+      --text:#e8e8f0;--muted:#7070a0;--success:#00e5a0;--error:#ff6b6b;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+    .bg-grid{position:fixed;inset:0;z-index:0;
+      background-image:linear-gradient(rgba(255,215,0,0.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,215,0,0.03) 1px,transparent 1px);
+      background-size:40px 40px;}
+    nav{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;
+      padding:16px 48px;background:rgba(10,10,15,0.85);border-bottom:1px solid var(--border);
+      backdrop-filter:blur(12px);}
+    .logo{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;
+      background:linear-gradient(135deg,var(--gold),#ffaa00);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .admin-badge{background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);
+      color:var(--gold);border-radius:20px;padding:5px 14px;font-size:0.8rem;font-weight:600;}
+    .btn-logout{background:var(--card);border:1px solid var(--border);color:var(--muted);
+      padding:7px 14px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:0.82rem;
+      cursor:pointer;text-decoration:none;transition:all 0.2s;}
+    .btn-logout:hover{border-color:var(--error);color:var(--error);}
+    .main{position:relative;z-index:5;max-width:1100px;margin:0 auto;padding:36px 24px;}
+    .page-title{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;margin-bottom:4px;}
+    .page-title span{background:linear-gradient(135deg,var(--gold),#ffaa00);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+    .page-sub{color:var(--muted);margin-bottom:28px;font-size:0.88rem;}
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:28px;}
+    .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+      padding:20px;text-align:center;transition:border-color 0.2s;}
+    .stat-card:hover{border-color:var(--gold);}
+    .stat-val{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px;}
+    .stat-lbl{color:var(--muted);font-size:0.78rem;}
+
+    /* TABS ADMIN */
+    .admin-tabs{display:flex;gap:6px;margin-bottom:20px;flex-wrap:wrap;}
+    .atab{background:var(--card);border:1px solid var(--border);color:var(--muted);
+      padding:8px 18px;border-radius:8px;cursor:pointer;font-family:'DM Sans',sans-serif;
+      font-size:0.85rem;transition:all 0.2s;}
+    .atab.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .atab-content{display:none;}
+    .atab-content.active{display:block;}
+
+    .section-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;
+      margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+    .table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;min-width:500px;}
+    th{background:var(--surface);padding:11px 14px;text-align:left;font-size:0.75rem;
+      color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:0.5px;}
+    td{padding:11px 14px;font-size:0.85rem;border-top:1px solid var(--border);}
+    tr:hover td{background:rgba(108,99,255,0.04);}
+    .tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:0.72rem;font-weight:500;}
+    .tag-pays{background:rgba(0,212,255,0.1);color:var(--accent2);border:1px solid rgba(0,212,255,0.2);}
+    .tag-ip{background:rgba(108,99,255,0.1);color:var(--accent);border:1px solid rgba(108,99,255,0.2);}
+    .tag-ok{background:rgba(0,229,160,0.1);color:var(--success);border:1px solid rgba(0,229,160,0.2);}
+    .tag-used{background:rgba(255,107,107,0.1);color:var(--error);border:1px solid rgba(255,107,107,0.2);}
+    .tag-date{color:var(--muted);font-size:0.78rem;}
+    .empty{text-align:center;padding:28px;color:var(--muted);font-size:0.88rem;}
+
+    .pays-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;}
+    .pays-item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+    .pays-top{display:flex;justify-content:space-between;}
+    .pays-name{font-weight:500;font-size:0.88rem;}
+    .pays-count{font-family:'Syne',sans-serif;font-weight:700;font-size:1.05rem;color:var(--accent);}
+    .pays-bar{height:4px;background:var(--border);border-radius:2px;margin-top:8px;}
+    .pays-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;}
+
+    .token-cell{font-family:monospace;font-size:0.72rem;color:var(--muted);max-width:120px;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+    @media(max-width:600px){nav{padding:12px 14px;}.main{padding:20px 14px;}}
+  </style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<nav>
+  <div class="logo">👑 ThermoApp Admin</div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <div class="admin-badge">⭐ {{ current_user.nom }}</div>
+    <a href="/logout" class="btn-logout">Déconnexion</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="page-title">Panneau <span>Administrateur</span></div>
+  <div class="page-sub">ThermoApp V2 — Vue complète du système</div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-val">{{ total_users }}</div>
+      <div class="stat-lbl">👥 Utilisateurs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">{{ logs|length }}</div>
+      <div class="stat-lbl">🔗 Connexions récentes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">{{ stats_pays|length }}</div>
+      <div class="stat-lbl">🌍 Pays représentés</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val">{{ resets|length }}</div>
+      <div class="stat-lbl">🔑 Demandes reset</div>
+    </div>
+  </div>
+
+  <!-- ONGLETS -->
+  <div class="admin-tabs">
+    <button class="atab active" onclick="showTab('users')">👥 Utilisateurs</button>
+    <button class="atab" onclick="showTab('logs')">🔗 Connexions</button>
+    <button class="atab" onclick="showTab('pays')">🌍 Par pays</button>
+    <button class="atab" onclick="showTab('resets')">🔑 Réinitialisations</button>
+  </div>
+
+  <!-- UTILISATEURS -->
+  <div class="atab-content active" id="tab-users">
+    <div class="section-title">👥 Utilisateurs inscrits</div>
+    <div class="table-wrap">
+      {% if users %}
+      <table>
+        <thead><tr><th>#</th><th>Nom</th><th>Email</th><th>Pays</th><th>Date inscription</th></tr></thead>
+        <tbody>
+          {% for u in users %}
+          <tr>
+            <td style="color:var(--muted);">{{ u[0] }}</td>
+            <td><strong>{{ u[1] }}</strong></td>
+            <td style="color:var(--muted);font-size:0.8rem;">{{ u[2] }}</td>
+            <td><span class="tag tag-pays">{{ u[3] or '—' }}</span></td>
+            <td><span class="tag-date">{{ u[4][:16] if u[4] else '—' }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">Aucun utilisateur inscrit.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- CONNEXIONS -->
+  <div class="atab-content" id="tab-logs">
+    <div class="section-title">🔗 Dernières connexions</div>
+    <div class="table-wrap">
+      {% if logs %}
+      <table>
+        <thead><tr><th>Nom</th><th>Email</th><th>IP</th><th>Pays</th><th>Date</th></tr></thead>
+        <tbody>
+          {% for log in logs %}
+          <tr>
+            <td><strong>{{ log[0] }}</strong></td>
+            <td style="color:var(--muted);font-size:0.78rem;">{{ log[1] }}</td>
+            <td><span class="tag tag-ip">{{ log[2] or '—' }}</span></td>
+            <td><span class="tag tag-pays">{{ log[3] or '—' }}</span></td>
+            <td><span class="tag-date">{{ log[4][:16] if log[4] else '—' }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">Aucune connexion enregistrée.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- PAR PAYS -->
+  <div class="atab-content" id="tab-pays">
+    <div class="section-title">🌍 Répartition par pays</div>
+    {% if stats_pays %}
+    <div class="pays-grid">
+      {% set max_count = stats_pays[0][1] %}
+      {% for pays, count in stats_pays %}
+      <div class="pays-item">
+        <div class="pays-top">
+          <span class="pays-name">{{ pays or 'Inconnu' }}</span>
+          <span class="pays-count">{{ count }}</span>
+        </div>
+        <div class="pays-bar">
+          <div class="pays-bar-fill" style="width:{{ (count / max_count * 100)|int }}%"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">Aucune donnée de pays.</div>
+    {% endif %}
+  </div>
+
+  <!-- RÉINITIALISATIONS -->
+  <div class="atab-content" id="tab-resets">
+    <div class="section-title">🔑 Demandes de réinitialisation de mot de passe</div>
+    <div class="table-wrap">
+      {% if resets %}
+      <table>
+        <thead><tr><th>#</th><th>User ID</th><th>Token</th><th>Date demande</th><th>Statut</th></tr></thead>
+        <tbody>
+          {% for r in resets %}
+          <tr>
+            <td style="color:var(--muted);">{{ r[0] }}</td>
+            <td>{{ r[1] }}</td>
+            <td class="token-cell" title="{{ r[2] }}">{{ r[2][:20] }}...</td>
+            <td><span class="tag-date">{{ r[3][:16] if r[3] else '—' }}</span></td>
+            <td>
+              {% if r[4] %}
+              <span class="tag tag-used">✅ Utilisé</span>
+              {% else %}
+              <span class="tag tag-ok">⏳ En attente</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">Aucune demande de réinitialisation.</div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function showTab(name) {
+    document.querySelectorAll('.atab').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.atab-content').forEach(c=>c.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>

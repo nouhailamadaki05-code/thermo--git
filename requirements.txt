@@ -1,0 +1,6 @@
+flask
+flask-login
+bcrypt
+requests
+gunicorn
+psycopg2-binary
